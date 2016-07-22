@@ -1,0 +1,14 @@
+{
+    "name": "jimmy.gleason/scrape",
+    "authors": [
+        {
+            "name": "Jimmy Gleason",
+            "email": "jimmy.gleason@akqa.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^6.2",
+        "league/flysystem": "^1.0",
+        "league/climate": "^3.2"
+    }
+}
