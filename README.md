@@ -8,6 +8,8 @@ I was curious to see a word cloud and some sentiment analysis of the convention 
 
 The actual functions that do the scraping aren't being called. I also provided all the photos of the speakers for future use when I actually make something more compelling with the data.
 
+C-SPAN's videos of the speeches can be found here: http://www.c-span.org/convention/
+
 ## Requirements
 
 * PHP 5.3+ 
@@ -17,5 +19,5 @@ The actual functions that do the scraping aren't being called. I also provided a
 ## Setup & Use
 
 1. `composer install`
-2. `>php index.php`
+2. `php index.php`
 
