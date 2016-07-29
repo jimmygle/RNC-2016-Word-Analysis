@@ -13,7 +13,8 @@ $fs = new Filesystem($fsAdapter);
 
 /**
  * Extracts speakers from raw schedule data dump of C-SPAN's convention schedule JSON text file.
- * http://www.c-span.org/convention/?party=rnc&day=1468825200
+ * http://www.c-span.org/convention/?party=rnc
+ * http://www.c-span.org/convention/?party=dnc
  */
 function extractSpeakersFromRawSchedule($fs, $cli, $rawScheduleFileName, $speakersFileName)
 {
@@ -51,7 +52,7 @@ function extractSpeakersFromRawSchedule($fs, $cli, $rawScheduleFileName, $speake
 
   echo "Speakers extracted from schedule.\n";
 }
-// extractSpeakersFromRawSchedule($fs, $cli, 'raw-schedule.txt', 'speakers.txt');
+// extractSpeakersFromRawSchedule($fs, $cli, 'dnc-raw-schedule.txt', 'dnc-speakers.txt');
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -100,7 +101,7 @@ function downloadImagesFromSpeakersFile($fs, $cli, $speakersFileName)
 
   $cli->green("Finished!")->br();
 }
-// downloadImagesFromSpeakersFile($fs, $cli, 'speakers.txt');
+// downloadImagesFromSpeakersFile($fs, $cli, 'dnc-speakers.txt');
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -121,7 +122,7 @@ function downloadSpeakerTranscripts($fs, $cli, $speakersFileName)
     $transcriptFileName = $speaker->slug . '.htm';
 
     // skip if transcript has been downloaded
-    if ($fs->has("/raw-transcripts/{$transcriptFileName}")) { 
+    if ($fs->has("/dnc-raw-transcripts/{$transcriptFileName}")) { 
       $progressBar->current($key, "<cyan>EXISTS  {$transcriptFileName}</cyan>");
       usleep(200000);
     } else {
@@ -130,13 +131,13 @@ function downloadSpeakerTranscripts($fs, $cli, $speakersFileName)
         $client = new Client;
         $transcriptUrl = "http://www.c-span.org/{$speaker->link}&action=getTranscript&transcriptType=cc&transcriptSpeaker=&transcriptQuery=";
         $client->request('get', $transcriptUrl, [
-          'sink' => __DIR__ . "/data/raw-transcripts/{$transcriptFileName}"
+          'sink' => __DIR__ . "/data/dnc-raw-transcripts/{$transcriptFileName}"
         ]);
         $progressBar->current($key, "<green>OK      {$transcriptFileName}</green>");
         usleep(rand(750000, 2500000));
       } catch (Exception $e) {
         // delete the file, show error, and prompt user to continue
-        $fs->delete("/raw-transcripts/{$transcriptFileName}");
+        $fs->delete("/dnc-raw-transcripts/{$transcriptFileName}");
         $progressBar->current($key, "<red>ERROR   {$transcriptFileName}</red>");
         $cli->br()->yellow($e->getMessage());
         $continue = $cli->confirm('Continue?');
@@ -148,7 +149,7 @@ function downloadSpeakerTranscripts($fs, $cli, $speakersFileName)
     }
   }
 }
-// downloadSpeakerTranscripts($fs, $cli, 'speakers.txt');
+// downloadSpeakerTranscripts($fs, $cli, 'dnc-speakers.txt');
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -159,7 +160,7 @@ function analyzeWordUsage($fs, $cli)
 {
   $cli->clear()->br()->white()->bold()->out('Analyzing Word Usage')->border()->br(2);
 
-  $rawTranscriptFiles = glob(__DIR__ . '/data/raw-transcripts/*.htm');
+  $rawTranscriptFiles = glob(__DIR__ . '/data/rnc-raw-transcripts/*.htm');
 
   $toStrip = [
     '>>', '  ', '.', ',', '?', ':', ';', '[CHEERG]', '--', '[PPLUSE]'
@@ -168,7 +169,7 @@ function analyzeWordUsage($fs, $cli)
   $words = [];
 
   foreach ($rawTranscriptFiles as $transcriptFile) {
-    $rawTranscript = $fs->read('/raw-transcripts/' . basename($transcriptFile));
+    $rawTranscript = $fs->read('/rnc-raw-transcripts/' . basename($transcriptFile));
     $rawTranscript = array_shift((explode('<script', $rawTranscript)));
     $rawTranscript = strip_tags(trim($rawTranscript));
     $rawTranscript = str_replace("\n", ' ', $rawTranscript);
@@ -181,7 +182,6 @@ function analyzeWordUsage($fs, $cli)
     foreach ($rawWords as $word) {
       array_key_exists($word, $words) ? $words[$word]++ : $words[$word] = 1;
     }
-
   }
 
   // asort($words);
@@ -213,7 +213,4 @@ function analyzeWordUsage($fs, $cli)
   }
 
 }
-analyzeWordUsage($fs, $cli);
-
-
-
+// analyzeWordUsage($fs, $cli);
